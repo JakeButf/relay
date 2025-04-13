@@ -1,5 +1,3 @@
-//UI
-
 import { Text, TextInput, View, StyleSheet } from "react-native";
 import {Link} from 'expo-router'
 import ChatBox from "@/components/ChatBox";

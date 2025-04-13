@@ -22,38 +22,48 @@ export default function MessageView()
     ircRef.current = irc;
 
     irc.on('registered', () => {
-      setMessages(m => [...m, '* Connected to IRC server *']);
-      irc.join(channel);
+        setMessages(m => [...m, '* Connected to IRC server *']);
+        irc.join(channel);
     });
 
     irc.on('message', ({ from, to, text }) => {
-      setMessages(m => [...m, `${from} ⇒ ${to}: ${text}`]);
+        setMessages(m => [...m, `${from} ⇒ ${to}: ${text}`]);
     });
 
     irc.on('error', ({ message }) => {
-      setMessages(m => [...m, `! ERROR: ${message}`]);
+        //error handling
+
+        if(message == "WebSocket error") //TODO: check if this is the right way to approach
+        {
+            setMessages(m => [...m, "! ERROR ! : Couldn't establish websocket connection. Check internet connection and server status."]);
+        } else 
+        {
+            setMessages(m => [...m, `! ERROR ! : ${message}`]);
+        }
     });
 
     irc.connect('ws://localhost:8080', {
-      host: 'irc.libera.chat',
-      port: 6697,
-      nick: 'testname213232',
-      tls:  true,
+        host: 'irc.libera.chat',
+        port: 6697,
+        nick: 'testname213232',
+        tls:  true,
     });
 }, []);
 
 const sendMessage = (text: string) => {
     if (!text.trim()) return;
     ircRef.current?.say(channel, text);
-    //also locally echo it
+    //say it locally too
     setMessages(m => [...m, `me ⇒ ${channel}: ${text}`]);
 };
 
 const changeChannel = (channelName: string) => {
+    
+    ircRef.current?.part(channel);
     setChannel(channelName);
     ircRef.current?.join(channelName);
 
-    setMessages(m => [...m, `* Switched Channels To ${channel} *`]);
+    setMessages(m => [...m, `* Switched Channels To ${channelName} *`]);
 };
 
     return(
@@ -66,7 +76,7 @@ const changeChannel = (channelName: string) => {
                 <MessageBox messages={messages}/>
                 <ChatBox onSend={sendMessage}/>
             </View>
-         </View>    
+        </View>
     );
 }
 
