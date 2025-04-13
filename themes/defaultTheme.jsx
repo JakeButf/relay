@@ -11,6 +11,16 @@ const defaultTheme = StyleSheet.create({
         width: '100%',
         backgroundColor: '#ddd',
     },
+
+    textInput: {
+        borderBottomColor: '#c0c0c0',
+        borderBottomWidth: 1,
+        color: '#fff',
+    },
+
+    button: {
+        backgroundColor: '#ffd33d',
+    }
 });
 
 export default defaultTheme;

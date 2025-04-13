@@ -7,10 +7,13 @@ import MessageBox from './MessageBox';
 import ChannelHeader from './ChannelHeader';
 
 import { IRCClient } from '@/src/utils/ircClient';
+import ChannelNavBar from './ChannelNavBar';
 
 export default function MessageView()
 {
-    const defaultChannel = "test";
+    const defaultChannel = "#test";
+
+    const [channel, setChannel] = useState(defaultChannel);
     const [messages, setMessages] = useState<string[]>([]);
     const ircRef = useRef<IRCClient>();
 
@@ -20,7 +23,7 @@ export default function MessageView()
 
     irc.on('registered', () => {
       setMessages(m => [...m, '* Connected to IRC server *']);
-      irc.join(defaultChannel);
+      irc.join(channel);
     });
 
     irc.on('message', ({ from, to, text }) => {
@@ -41,16 +44,26 @@ export default function MessageView()
 
 const sendMessage = (text: string) => {
     if (!text.trim()) return;
-    ircRef.current?.say('#test', text);
+    ircRef.current?.say(channel, text);
     //also locally echo it
-    setMessages(m => [...m, `me ⇒ #test: ${text}`]);
+    setMessages(m => [...m, `me ⇒ ${channel}: ${text}`]);
+};
+
+const changeChannel = (channelName: string) => {
+    setChannel(channelName);
+    ircRef.current?.join(channelName);
 };
 
     return(
-        <View style={styles.container}>
-            <ChannelHeader channel={defaultChannel}/>
-            <MessageBox messages={messages}/>
-            <ChatBox onSend={sendMessage}/>
+        <View style={styles.horContainer}>
+            <View style={styles.navContainer}>
+                <ChannelNavBar onChangeChannel={changeChannel}/>
+            </View>
+            <View style={styles.container}>
+                <ChannelHeader channel={channel}/>
+                <MessageBox messages={messages}/>
+                <ChatBox onSend={sendMessage}/>
+            </View>
          </View>    
     );
 }
@@ -60,4 +73,14 @@ const styles = StyleSheet.create({
         width: '80%',
         flex: 1,
     },
+    horContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        width: '100%'
+    },
+    navContainer: {
+        flexDirection: 'column',
+        borderColor: '#fff',
+        borderRightWidth: 1
+    }
 });

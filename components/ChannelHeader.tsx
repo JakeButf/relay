@@ -10,7 +10,7 @@ export default function ChannelHeader({ channel }: Props)
 {
     return(
         <View style={styles.container}>
-            <Text style={[defaultTheme.header1]}>#{channel}</Text>
+            <Text style={[defaultTheme.header1]}>{channel}</Text>
             <HorizontalSeperator/>
         </View>
     );

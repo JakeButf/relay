@@ -55,5 +55,6 @@ const styles = StyleSheet.create({
     datetime: {
         color: '#c0c0c0',
         fontSize: 10,
+        marginLeft: 3
     },
 });
