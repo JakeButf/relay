@@ -52,6 +52,8 @@ const sendMessage = (text: string) => {
 const changeChannel = (channelName: string) => {
     setChannel(channelName);
     ircRef.current?.join(channelName);
+
+    setMessages(m => [...m, `* Switched Channels To ${channel} *`]);
 };
 
     return(
