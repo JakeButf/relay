@@ -1,6 +1,7 @@
 import React from 'react';
 import {StyleSheet, TextInput, View, Button, KeyboardAvoidingView, Platform} from 'react-native';
 import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
+import IconButton from './IconButton';
 
 interface Props {
     onSend: (text: string) => void;
@@ -30,7 +31,7 @@ export default function ChatBox({ onSend }: Props)
           onSubmitEditing={handleSend}
           returnKeyType="send"
         />
-        <Button title="Send" onPress={handleSend} />
+        <IconButton onPress={handleSend} focusedIcon={'arrow-forward-circle-sharp'} unfocusedIcon={'arrow-forward-circle-outline'} iconColor='#fff' size={32}/>
       </View>
     </KeyboardAvoidingView>
   );
