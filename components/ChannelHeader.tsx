@@ -5,16 +5,15 @@ import IconButton from './IconButton';
 
 interface Props {
     channel: string;
+    onBookmark: (text: string) => void;
 }
 
-export default function ChannelHeader({ channel }: Props)
+export default function ChannelHeader({ channel, onBookmark }: Props)
 {
-    const handleSend = () => {
-        console.log("t");
-    };
     return(
         <View>
             <View style={styles.container}>
+                <IconButton transparentBackground={true} onPress={() => onBookmark(channel)} focusedIcon={'bookmark-sharp'} unfocusedIcon={'bookmark-outline'} iconColor='#fff' size={24}/>
                 <Text style={[defaultTheme.header1]}>{channel}</Text>
             </View>
             <HorizontalSeperator/>

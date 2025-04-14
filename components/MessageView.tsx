@@ -8,14 +8,30 @@ import ChannelHeader from './ChannelHeader';
 
 import { IRCClient } from '@/src/utils/ircClient';
 import ChannelNavBar from './ChannelNavBar';
+import ChannelBookmarkList from './ChannelBookmarkList';
+import { loadBookmarks, addBookmark, saveBookmarks, containsBookmark } from '@/src/appState';
 
 export default function MessageView()
 {
     const defaultChannel = "#test";
+    const [bookmarks, setBookmarks] = useState<string[]>([]);
 
     const [channel, setChannel] = useState(defaultChannel);
     const [messages, setMessages] = useState<string[]>([]);
     const ircRef = useRef<IRCClient>();
+
+    //bookmark loading
+    useEffect(() => {
+        async function fetchBookmarks() {
+          try {
+            const loaded = await loadBookmarks();
+            setBookmarks(loaded);
+          } catch (error) {
+            console.error('Error loading bookmarks:', error);
+          }
+        }
+        fetchBookmarks();
+      }, []);
 
     useEffect(() => {
     const irc = new IRCClient();
@@ -57,6 +73,26 @@ const sendMessage = (text: string) => {
     setMessages(m => [...m, `me ⇒ ${channel}: ${text}`]);
 };
 
+const switchToBookMark = (channelName: string) => {
+    changeChannel('#' + channelName);
+}
+
+const addNewBookmark = async(channelName: string) => {
+    const contains = await containsBookmark(channelName);
+
+    if(!contains)
+    {
+        if(channelName[0] === '#')
+        {
+            channelName = channelName.substring(1);
+        }
+        await addBookmark(channelName);
+        const loadedBookmarks = await loadBookmarks();
+        setBookmarks(loadedBookmarks);
+        console.log(loadBookmarks);
+    }
+}
+
 const changeChannel = (channelName: string) => {
     
     ircRef.current?.part(channel);
@@ -70,9 +106,10 @@ const changeChannel = (channelName: string) => {
         <View style={styles.horContainer}>
             <View style={styles.navContainer}>
                 <ChannelNavBar onChangeChannel={changeChannel}/>
+                <ChannelBookmarkList bookmarks={bookmarks} onPress={switchToBookMark}/>
             </View>
             <View style={styles.container}>
-                <ChannelHeader channel={channel}/>
+                <ChannelHeader onBookmark={addNewBookmark} channel={channel}/>
                 <MessageBox messages={messages}/>
                 <ChatBox onSend={sendMessage}/>
             </View>

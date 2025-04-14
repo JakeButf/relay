@@ -31,7 +31,7 @@ export default function ChatBox({ onSend }: Props)
           onSubmitEditing={handleSend}
           returnKeyType="send"
         />
-        <IconButton onPress={handleSend} focusedIcon={'arrow-forward-circle-sharp'} unfocusedIcon={'arrow-forward-circle-outline'} iconColor='#fff' size={32}/>
+        <IconButton transparentBackground={true} onPress={handleSend} focusedIcon={'arrow-forward-circle-sharp'} unfocusedIcon={'arrow-forward-circle-outline'} iconColor='#fff' size={32}/>
       </View>
     </KeyboardAvoidingView>
   );

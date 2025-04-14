@@ -20,6 +20,17 @@ const defaultTheme = StyleSheet.create({
 
     button: {
         backgroundColor: '#ffd33d',
+    },
+
+    channelBookmarkIcon: {
+        fontSize: 30,
+        color: '#fff'
+    },
+
+    channelBookmarkNameText: {
+        color: '#fff',
+        fontSize: 22,
+        padding: 2
     }
 });
 
