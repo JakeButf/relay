@@ -24,7 +24,8 @@ const defaultTheme = StyleSheet.create({
 
     channelBookmarkIcon: {
         fontSize: 30,
-        color: '#fff'
+        color: '#888',
+        paddingLeft: 5
     },
 
     channelBookmarkNameText: {
