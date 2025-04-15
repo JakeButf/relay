@@ -1,9 +1,10 @@
 import {Text, View, StyleSheet} from 'react-native';
+import SettingsView from '@/components/SettingsView';
 
 export default function SettingsPage() {
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>Settings</Text>
+            <SettingsView/>
         </View>
     )
 }

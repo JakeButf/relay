@@ -9,18 +9,19 @@ import ChannelHeader from './ChannelHeader';
 import { IRCClient } from '@/src/utils/ircClient';
 import ChannelNavBar from './ChannelNavBar';
 import ChannelBookmarkList from './ChannelBookmarkList';
-import { loadBookmarks, addBookmark, saveBookmarks, containsBookmark } from '@/src/appState';
+import { loadBookmarks, addBookmark, saveBookmarks, containsBookmark, loadUserSettings, userSettings } from '@/src/appState';
 
 export default function MessageView()
 {
     const defaultChannel = "#test";
     const [bookmarks, setBookmarks] = useState<string[]>([]);
+    const [appSettings, setAppSettings] = useState<userSettings>(new userSettings("", ""));
 
     const [channel, setChannel] = useState(defaultChannel);
     const [messages, setMessages] = useState<string[]>([]);
     const ircRef = useRef<IRCClient>();
 
-    //bookmark loading
+    //bookmark loading & user data loading
     useEffect(() => {
         async function fetchBookmarks() {
           try {
@@ -30,41 +31,54 @@ export default function MessageView()
             console.error('Error loading bookmarks:', error);
           }
         }
+
+        async function fetchUserSettings() {
+            try {
+                const loaded = await loadUserSettings();
+                setAppSettings(loaded);
+            } catch (err) {
+                console.error('Error loading user data:', err);
+            }
+        }
         fetchBookmarks();
+        fetchUserSettings();
       }, []);
 
     useEffect(() => {
-    const irc = new IRCClient();
-    ircRef.current = irc;
+        //wait on settings to load
+        if (!appSettings.network || !appSettings.nickName) return;
 
-    irc.on('registered', () => {
-        setMessages(m => [...m, '* Connected to IRC server *']);
-        irc.join(channel);
-    });
+        const irc = new IRCClient();
+        ircRef.current = irc;
 
-    irc.on('message', ({ from, to, text }) => {
-        setMessages(m => [...m, `${from} ⇒ ${to}: ${text}`]);
-    });
+        irc.on('registered', () => {
+            setMessages(m => [...m, '* Connected to IRC server *']);
+            irc.join(channel);
+        });
 
-    irc.on('error', ({ message }) => {
-        //error handling
+        irc.on('message', ({ from, to, text }) => {
+            setMessages(m => [...m, `${from} ⇒ ${to}: ${text}`]);
+        });
 
-        if(message == "WebSocket error") //TODO: check if this is the right way to approach
-        {
-            setMessages(m => [...m, "! ERROR ! : Couldn't establish websocket connection. Check internet connection and server status."]);
-        } else 
-        {
-            setMessages(m => [...m, `! ERROR ! : ${message}`]);
-        }
-    });
+        irc.on('error', ({ message }) => {
+            //error handling
 
-    irc.connect('ws://localhost:8080', {
-        host: 'irc.libera.chat',
-        port: 6697,
-        nick: 'testname213232',
-        tls:  true,
-    });
-}, []);
+            if(message == "WebSocket error") //TODO: check if this is the right way to approach
+            {
+                setMessages(m => [...m, "! ERROR ! : Couldn't establish websocket connection. Check internet connection and server status."]);
+            } else 
+            {
+                setMessages(m => [...m, `! ERROR ! : ${message}`]);
+            }
+        });
+
+        irc.connect('ws://localhost:8080', {
+            host: appSettings.network,
+            port: 6697,
+            nick: appSettings.nickName,
+            tls:  true,
+        });
+    }, [appSettings]);
 
 const sendMessage = (text: string) => {
     if (!text.trim()) return;

@@ -32,7 +32,12 @@ const defaultTheme = StyleSheet.create({
         color: '#fff',
         fontSize: 22,
         padding: 2
-    }
+    },
+
+    settingsNavigationText: {
+        color: '#fff',
+        fontSize: 24,
+    },
 });
 
 export default defaultTheme;

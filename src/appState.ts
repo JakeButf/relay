@@ -1,5 +1,42 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export class userSettings {
+    nickName: string;
+    network: string;
+
+    constructor(nickName: string, network: string) {
+        this.nickName = nickName;
+        this.network = network;
+    }
+}   
+
+export const saveUserSettings = async (settings: userSettings) =>
+{
+    try {
+        const json = JSON.stringify(settings);
+        await AsyncStorage.setItem('@user_settings', json);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+export const loadUserSettings = async(): Promise<userSettings> =>
+{
+    const defaultSettings = new userSettings("test", "test2");
+    try {
+        const json = await AsyncStorage.getItem('@user_settings');
+        if(json != null)
+        {
+            return JSON.parse(json);
+        }
+        saveUserSettings(defaultSettings);
+        return defaultSettings;
+    } catch (err) {
+        console.error(err);
+        return defaultSettings;
+    }
+}
+
 export const saveBookmarks = async (bookmarks: string[]) => 
 {
     try {
@@ -40,3 +77,4 @@ export const containsBookmark = async(channel: string): Promise<boolean> =>
 
     return bookmarks.includes(channel);
 }
+
