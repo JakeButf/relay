@@ -14,6 +14,7 @@ export default function SettingsOptions({ categoryIndex, settings, onSettingsCha
         if (categoryIndex === 0) {
             return (
                 <View style={styles.container}>
+                    <Text style={defaultTheme.optionsLabel} aria-label="Label for username" nativeID='labelUsername'>Nickname:</Text>
                     <TextInput
                         style={defaultTheme.textInput}
                         placeholder='Nickname'
@@ -22,6 +23,7 @@ export default function SettingsOptions({ categoryIndex, settings, onSettingsCha
                             onSettingsChange({ ...settings, nickName: value });
                         }}
                     />
+                    <Text style={defaultTheme.optionsLabel} aria-label="Label for network" nativeID='labelUsername'>Network:</Text>
                     <TextInput
                         style={defaultTheme.textInput}
                         placeholder='IRC Network'
