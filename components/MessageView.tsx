@@ -18,6 +18,7 @@ export default function MessageView() {
 
     const [channel, setChannel] = useState(defaultChannel);
     const [messages, setMessages] = useState<string[]>([]);
+    const [timestamps, setTimestamps] = useState<string[]>([]);
     const ircRef = useRef<IRCClient>();
 
     //bookmark loading & user data loading
@@ -52,11 +53,13 @@ export default function MessageView() {
 
         irc.on('registered', () => {
             setMessages(m => [...m, '* Connected to IRC server *']);
+            setTimestamps(m => [...m, new Date().toTimeString()]);
             irc.join(channel);
         });
 
         irc.on('message', ({ from, to, text }) => {
             setMessages(m => [...m, `${from} ⇒ ${to}: ${text}`]);
+            setTimestamps(m => [...m, new Date().toTimeString()]);
         });
 
         irc.on('error', ({ message }) => {
@@ -65,13 +68,16 @@ export default function MessageView() {
             if (message == "WebSocket error") //TODO: check if this is the right way to approach
             {
                 setMessages(m => [...m, "! ERROR ! : Couldn't establish websocket connection. Check internet connection and server status."]);
+                setTimestamps(m => [...m, new Date().toTimeString()]);
             } else {
                 setMessages(m => [...m, `! ERROR ! : ${message}`]);
+                setTimestamps(m => [...m, new Date().toTimeString()]);
             }
         });
         //nick reminder
         if (appSettings.nickName === "NewUser") {
             setMessages(m => [...m, '* Nickname has not been set. Using default for now (you can change this in settings.)']);
+            setTimestamps(m => [...m, new Date().toTimeString()]);
         }
         irc.connect('ws://localhost:8080', {
             host: appSettings.network,
@@ -86,6 +92,7 @@ export default function MessageView() {
         ircRef.current?.say(channel, text);
         //say it locally too
         setMessages(m => [...m, `me ⇒ ${channel}: ${text}`]);
+        setTimestamps(m => [...m, new Date().toTimeString()]);
     };
 
     const switchToBookMark = (channelName: string) => {
@@ -113,6 +120,7 @@ export default function MessageView() {
         ircRef.current?.join(channelName);
 
         setMessages(m => [...m, `* Switched Channels To ${channelName} *`]);
+        setTimestamps(m => [...m, new Date().toTimeString()]);
     };
 
     return (
@@ -123,7 +131,7 @@ export default function MessageView() {
             </View>
             <View style={styles.container}>
                 <ChannelHeader onBookmark={addNewBookmark} channel={channel} />
-                <MessageBox messages={messages} />
+                <MessageBox messages={messages} timestamps={timestamps} />
                 <ChatBox onSend={sendMessage} />
             </View>
         </View>

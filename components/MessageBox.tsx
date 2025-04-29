@@ -5,9 +5,10 @@ import MessageContent from './MessageContent';
 
 interface Props {
   messages: string[];
+  timestamps: string[];
 }
 
-export default function MessageBox({ messages }: Props) {
+export default function MessageBox({ messages, timestamps }: Props) {
   return (
     <View style={styles.container}>
       <FlatList<string>
@@ -20,7 +21,7 @@ export default function MessageBox({ messages }: Props) {
             <MessageContent
               username={usernamePart}
               message={rest.join(': ')}
-              datetime={new Date().toLocaleTimeString()}
+              datetime={timestamps[messages.indexOf(item)]}
             />
           );
         }}
