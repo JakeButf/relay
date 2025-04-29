@@ -11,11 +11,10 @@ import ChannelNavBar from './ChannelNavBar';
 import ChannelBookmarkList from './ChannelBookmarkList';
 import { loadBookmarks, addBookmark, saveBookmarks, containsBookmark, loadUserSettings, userSettings } from '@/src/appState';
 
-export default function MessageView()
-{
+export default function MessageView() {
     const defaultChannel = "#test";
     const [bookmarks, setBookmarks] = useState<string[]>([]);
-    const [appSettings, setAppSettings] = useState<userSettings>(new userSettings("", ""));
+    const [appSettings, setAppSettings] = useState<userSettings>(new userSettings("NewUser", ""));
 
     const [channel, setChannel] = useState(defaultChannel);
     const [messages, setMessages] = useState<string[]>([]);
@@ -24,12 +23,12 @@ export default function MessageView()
     //bookmark loading & user data loading
     useEffect(() => {
         async function fetchBookmarks() {
-          try {
-            const loaded = await loadBookmarks();
-            setBookmarks(loaded);
-          } catch (error) {
-            console.error('Error loading bookmarks:', error);
-          }
+            try {
+                const loaded = await loadBookmarks();
+                setBookmarks(loaded);
+            } catch (error) {
+                console.error('Error loading bookmarks:', error);
+            }
         }
 
         async function fetchUserSettings() {
@@ -42,7 +41,7 @@ export default function MessageView()
         }
         fetchBookmarks();
         fetchUserSettings();
-      }, []);
+    }, []);
 
     useEffect(() => {
         //wait on settings to load
@@ -63,69 +62,69 @@ export default function MessageView()
         irc.on('error', ({ message }) => {
             //error handling
 
-            if(message == "WebSocket error") //TODO: check if this is the right way to approach
+            if (message == "WebSocket error") //TODO: check if this is the right way to approach
             {
                 setMessages(m => [...m, "! ERROR ! : Couldn't establish websocket connection. Check internet connection and server status."]);
-            } else 
-            {
+            } else {
                 setMessages(m => [...m, `! ERROR ! : ${message}`]);
             }
         });
-
+        //nick reminder
+        if (appSettings.nickName === "NewUser") {
+            setMessages(m => [...m, '* Nickname has not been set. Using default for now (you can change this in settings.)']);
+        }
         irc.connect('ws://localhost:8080', {
             host: appSettings.network,
             port: 6697,
             nick: appSettings.nickName,
-            tls:  true,
+            tls: true,
         });
     }, [appSettings]);
 
-const sendMessage = (text: string) => {
-    if (!text.trim()) return;
-    ircRef.current?.say(channel, text);
-    //say it locally too
-    setMessages(m => [...m, `me ⇒ ${channel}: ${text}`]);
-};
+    const sendMessage = (text: string) => {
+        if (!text.trim()) return;
+        ircRef.current?.say(channel, text);
+        //say it locally too
+        setMessages(m => [...m, `me ⇒ ${channel}: ${text}`]);
+    };
 
-const switchToBookMark = (channelName: string) => {
-    changeChannel('#' + channelName);
-}
-
-const addNewBookmark = async(channelName: string) => {
-    const contains = await containsBookmark(channelName);
-
-    if(!contains)
-    {
-        if(channelName[0] === '#')
-        {
-            channelName = channelName.substring(1);
-        }
-        await addBookmark(channelName);
-        const loadedBookmarks = await loadBookmarks();
-        setBookmarks(loadedBookmarks);
-        console.log(loadBookmarks);
+    const switchToBookMark = (channelName: string) => {
+        changeChannel('#' + channelName);
     }
-}
 
-const changeChannel = (channelName: string) => {
-    
-    ircRef.current?.part(channel);
-    setChannel(channelName);
-    ircRef.current?.join(channelName);
+    const addNewBookmark = async (channelName: string) => {
+        const contains = await containsBookmark(channelName);
 
-    setMessages(m => [...m, `* Switched Channels To ${channelName} *`]);
-};
+        if (!contains) {
+            if (channelName[0] === '#') {
+                channelName = channelName.substring(1);
+            }
+            await addBookmark(channelName);
+            const loadedBookmarks = await loadBookmarks();
+            setBookmarks(loadedBookmarks);
+            console.log(loadBookmarks);
+        }
+    }
 
-    return(
+    const changeChannel = (channelName: string) => {
+
+        ircRef.current?.part(channel);
+        setChannel(channelName);
+        ircRef.current?.join(channelName);
+
+        setMessages(m => [...m, `* Switched Channels To ${channelName} *`]);
+    };
+
+    return (
         <View style={styles.horContainer}>
             <View style={styles.navContainer}>
-                <ChannelNavBar onChangeChannel={changeChannel}/>
-                <ChannelBookmarkList bookmarks={bookmarks} onPress={switchToBookMark}/>
+                <ChannelNavBar onChangeChannel={changeChannel} />
+                <ChannelBookmarkList bookmarks={bookmarks} onPress={switchToBookMark} />
             </View>
             <View style={styles.container}>
-                <ChannelHeader onBookmark={addNewBookmark} channel={channel}/>
-                <MessageBox messages={messages}/>
-                <ChatBox onSend={sendMessage}/>
+                <ChannelHeader onBookmark={addNewBookmark} channel={channel} />
+                <MessageBox messages={messages} />
+                <ChatBox onSend={sendMessage} />
             </View>
         </View>
     );
